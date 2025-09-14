@@ -110,6 +110,9 @@ struct primitive
 	vk::DeviceSize index_offset;
 	vk::DeviceSize vertex_offset;
 
+	glm::vec3 aabb_min;
+	glm::vec3 aabb_max;
+
 	// See also material::double_sided
 	vk::CullModeFlagBits cull_mode = vk::CullModeFlagBits::eNone;
 	vk::FrontFace front_face = vk::FrontFace::eClockwise;

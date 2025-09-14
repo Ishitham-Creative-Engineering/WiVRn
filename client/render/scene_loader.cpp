@@ -32,6 +32,7 @@
 #include <fastgltf/types.hpp>
 #include <fastgltf/util.hpp>
 #include <glm/ext.hpp>
+#include <limits>
 #include <ranges>
 #include <spdlog/spdlog.h>
 
@@ -691,6 +692,21 @@ public:
 				copy_vertex_attributes(gltf, gltf_primitive, "COLOR", vertices, &renderer::vertex::color);
 				copy_vertex_attributes(gltf, gltf_primitive, "JOINTS_", vertices, &renderer::vertex::joints);
 				copy_vertex_attributes(gltf, gltf_primitive, "WEIGHTS_", vertices, &renderer::vertex::weights);
+
+				// Compute the AABB
+				glm::vec3 aabb_min{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+				glm::vec3 aabb_max = -aabb_min;
+				for(const auto& vertex: vertices)
+				{
+					aabb_min.x = std::min(aabb_min.x, vertex.position.x);
+					aabb_min.y = std::min(aabb_min.y, vertex.position.y);
+					aabb_min.z = std::min(aabb_min.z, vertex.position.z);
+					aabb_max.x = std::max(aabb_max.x, vertex.position.x);
+					aabb_max.y = std::max(aabb_max.y, vertex.position.y);
+					aabb_max.z = std::max(aabb_max.z, vertex.position.z);
+				}
+				primitive_ref.aabb_min = aabb_min;
+				primitive_ref.aabb_max = aabb_max;
 
 				primitive_ref.vertex_offset = staging_buffer.add_vertices(vertices);
 				primitive_ref.vertex_count = vertices.size();
