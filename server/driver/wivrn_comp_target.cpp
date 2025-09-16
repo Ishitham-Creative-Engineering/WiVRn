@@ -516,6 +516,21 @@ static void comp_wivrn_present_thread(std::stop_token stop_token, wivrn_comp_tar
 	}
 }
 
+bool wivrn_comp_target::check_present_time()
+{
+	for (size_t i = 0; i < c->base.layer_accum.layer_count; ++i)
+	{
+		const auto & layer = c->base.layer_accum.layers[i];
+		if (layer.data.type == XRT_LAYER_PROJECTION)
+		{
+			if (layer.data.timestamp == last_present_timestamp)
+				return true;
+			last_present_timestamp = layer.data.timestamp;
+		}
+	}
+	return false;
+}
+
 static VkResult comp_wivrn_present(struct comp_target * ct,
                                    VkQueue queue_,
                                    uint32_t index,
@@ -539,7 +554,7 @@ static VkResult comp_wivrn_present(struct comp_target * ct,
 	        .pWaitDstStageMask = &wait_stage,
 	};
 
-	if (cn->c->base.layer_accum.layer_count == 0 or not cn->cnx.get_offset())
+	if (cn->c->base.layer_accum.layer_count == 0 or not cn->cnx.get_offset() or cn->check_present_time())
 	{
 		scoped_lock lock(vk->queue_mutex);
 		cn->wivrn_bundle->queue.submit(submit_info);
