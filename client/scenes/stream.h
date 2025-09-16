@@ -76,6 +76,7 @@ private:
 
 	// for frames inside accumulator images
 	std::mutex frames_mutex;
+	std::condition_variable frames_cv;
 	std::vector<std::shared_ptr<wivrn::shard_accumulator::blit_handle>> common_frame(XrTime display_time);
 
 	std::unique_ptr<wivrn_session> network_session;
